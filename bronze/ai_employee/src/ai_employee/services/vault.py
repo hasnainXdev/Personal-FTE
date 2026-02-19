@@ -1,12 +1,18 @@
 """Vault service for managing all vault file operations."""
 
 import os
-import fcntl
 import shutil
+import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, List
 import markdown
+
+# Cross-platform file locking
+if sys.platform == 'win32':
+    import msvcrt
+else:
+    import fcntl
 
 from ..models.vault import VaultItem, VaultState, Source
 from ..errors import (
@@ -223,27 +229,36 @@ class VaultService:
     
     def _acquire_lock(self, file_handle, exclusive: bool = False, timeout: float = 5.0) -> bool:
         """
-        Acquire file lock with timeout.
-        
+        Acquire file lock with timeout (cross-platform).
+
         Args:
             file_handle: Open file handle
             exclusive: If True, acquire exclusive lock; otherwise shared
             timeout: Maximum time to wait for lock in seconds
-            
+
         Returns:
             True if lock acquired
-            
+
         Raises:
             FileLockTimeout: If lock cannot be acquired within timeout
         """
-        lock_type = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
         start_time = datetime.now()
-        
+
         while True:
             try:
-                fcntl.flock(file_handle.fileno(), lock_type | fcntl.LOCK_NB)
-                return True
-            except (IOError, OSError):
+                if sys.platform == 'win32':
+                    # Windows: use msvcrt for locking
+                    mode = msvcrt.LK_LOCK if exclusive else msvcrt.LK_NBLCK
+                    file_size = file_handle.seek(0, 2)  # Get file size
+                    file_handle.seek(0)
+                    msvcrt.locking(file_handle.fileno(), mode, file_size)
+                    return True
+                else:
+                    # Unix/Linux: use fcntl
+                    lock_type = fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH
+                    fcntl.flock(file_handle.fileno(), lock_type | fcntl.LOCK_NB)
+                    return True
+            except (IOError, OSError, OSError):
                 if (datetime.now() - start_time).total_seconds() > timeout:
                     return False
     

@@ -49,12 +49,16 @@ def validate_qwen_cli() -> bool:
 
 
 def get_vault_path(vault_path: Optional[str]) -> Path:
-    """Get vault path from argument or use default."""
+    """Get vault path from argument or use default at repository root (/bronze/)."""
     if vault_path:
         return Path(vault_path)
-    
-    # Default: AI_Employee_Vault in current directory
-    default_path = Path.cwd() / "AI_Employee_Vault"
+
+    # Default: AI_Employee_Vault at repository root (/bronze/AI_Employee_Vault)
+    # This ensures the vault is always at the correct location regardless of cwd
+    # Path: bronze/ai_employee/src/ai_employee/main.py -> bronze
+    current_file = Path(__file__).resolve()
+    project_root = current_file.parent.parent.parent.parent  # 4 levels up to /bronze/
+    default_path = project_root / "AI_Employee_Vault"
     return default_path
 
 

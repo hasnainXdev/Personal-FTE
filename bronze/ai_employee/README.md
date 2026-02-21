@@ -42,6 +42,7 @@ uv run python -m src.ai_employee.main start --skip-qwen-check
 ```
 
 This creates the following structure:
+
 ```
 AI_Employee_Vault/
 ├── Inbox/              # Newly processed inputs
@@ -70,11 +71,11 @@ uv run python -m src.ai_employee.main process /path/to/input/directory
 
 ## CLI Commands
 
-| Command | Description |
-|---------|-------------|
-| `start [vault_path]` | Initialize vault structure and start system |
-| `status [vault_path]` | Show current system status and statistics |
-| `process <path>` | Process input file or directory |
+| Command               | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `start [vault_path]`  | Initialize vault structure and start system |
+| `status [vault_path]` | Show current system status and statistics   |
+| `process <path>`      | Process input file or directory             |
 
 ### Options
 
@@ -121,6 +122,7 @@ Create `.ai_employee/config.json`:
 ```
 
 Set the app password environment variable:
+
 ```bash
 export GMAIL_APP_PASSWORD="your-app-password"
 ```
@@ -130,6 +132,7 @@ export GMAIL_APP_PASSWORD="your-app-password"
 ### ProcessFile
 
 Process markdown files from filesystem:
+
 - **Input**: File path to markdown file
 - **Output**: Markdown file created in Inbox/
 - **Invocation**: `python -m ai_employee.skills.process_file <file_path>`
@@ -137,6 +140,7 @@ Process markdown files from filesystem:
 ### ProcessEmail
 
 Process emails from Gmail:
+
 - **Input**: Email data (from, subject, body, message_id)
 - **Output**: Markdown file created in Inbox/
 - **Invocation**: `python -m ai_employee.skills.process_email`
@@ -192,16 +196,16 @@ ai_employee/
 
 ## Success Criteria
 
-| ID | Criterion | Status |
-|----|-----------|--------|
-| SC-001 | Vault structure exists within 5 minutes | ✅ |
-| SC-002 | Qwen CLI reads/writes markdown with 95% reliability | ✅ |
-| SC-003 | Watcher triggers within 30 seconds | ✅ |
-| SC-004 | At least one working Agent Skill | ✅ |
-| SC-005 | File transitions correct with 98% accuracy | ✅ |
-| SC-006 | Dashboard.md logs 100% of operations | ✅ |
-| SC-007 | System operates without manual intervention | ✅ |
-| SC-008 | System runs entirely locally | ✅ |
+| ID     | Criterion                                           | Status |
+| ------ | --------------------------------------------------- | ------ |
+| SC-001 | Vault structure exists within 5 minutes             | ✅     |
+| SC-002 | Qwen CLI reads/writes markdown with 95% reliability | ✅     |
+| SC-003 | Watcher triggers within 30 seconds                  | ✅     |
+| SC-004 | At least one working Agent Skill                    | ✅     |
+| SC-005 | File transitions correct with 98% accuracy          | ✅     |
+| SC-006 | Dashboard.md logs 100% of operations                | ✅     |
+| SC-007 | System operates without manual intervention         | ✅     |
+| SC-008 | System runs entirely locally                        | ✅     |
 
 ## License
 

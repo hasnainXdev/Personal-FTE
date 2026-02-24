@@ -68,28 +68,35 @@ class FilesystemWatcher(Watcher):
     def _fetch_items(self, since: datetime) -> list:
         """
         Fetch files from watched directory modified since the given timestamp.
+        
+        On first run (no state), processes ALL files in the directory.
         """
         items = []
         
+        # Check if this is first run (no state file exists)
+        is_first_run = not self.state_file.exists()
+
         # Get files matching patterns
         for pattern in self.file_patterns:
             if self.recursive:
                 files = self.watch_dir.rglob(pattern)
             else:
                 files = self.watch_dir.glob(pattern)
-            
+
             for file_path in files:
                 if not file_path.is_file():
                     continue
-                
+
                 # Check modification time
                 try:
                     mtime = datetime.fromtimestamp(
                         file_path.stat().st_mtime,
                         tz=timezone.utc
                     )
-                    
-                    if mtime > since:
+
+                    # On first run, process all files regardless of mtime
+                    # Otherwise, only process files modified since last check
+                    if is_first_run or mtime > since:
                         items.append({
                             "path": file_path,
                             "mtime": mtime,
@@ -97,8 +104,11 @@ class FilesystemWatcher(Watcher):
                         })
                 except Exception as e:
                     logger.warning(f"Failed to stat file {file_path}: {e}")
-        
-        logger.info(f"Found {len(items)} files modified since {since.isoformat()}")
+
+        if is_first_run:
+            logger.info(f"First run - found {len(items)} files to process")
+        else:
+            logger.info(f"Found {len(items)} files modified since {since.isoformat()}")
         return items
     
     def _extract_id(self, item) -> str:
@@ -179,18 +189,35 @@ File_Size: {item['size']} bytes
 def run_watcher():
     """Entry point for running Filesystem watcher"""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Filesystem Watcher")
     parser.add_argument("--test", action="store_true", help="Run test poll")
     parser.add_argument("--interval", type=int, default=60, help="Polling interval")
     parser.add_argument("--watch-dir", type=Path, help="Directory to watch")
+    parser.add_argument("--reset", action="store_true", help="Reset watcher state (clear processed IDs)")
     args = parser.parse_args()
-    
+
+    # Handle reset
+    if args.reset:
+        project_root = Path(__file__).parent.parent.parent
+        state_dir = project_root / "Logs_Extended"
+        state_file = state_dir / "watcher_filesystem_state.md"
+        processed_file = state_dir / "watcher_filesystem_processed.md"
+        
+        if state_file.exists():
+            state_file.unlink()
+            print(f"Deleted: {state_file}")
+        if processed_file.exists():
+            processed_file.unlink()
+            print(f"Deleted: {processed_file}")
+        print("✓ Watcher state reset - will process all files on next run")
+        return
+
     watcher = FilesystemWatcher(
         watch_dir=args.watch_dir,
         interval_seconds=args.interval
     )
-    
+
     if args.test:
         print("Running test poll...")
         count = watcher.poll()

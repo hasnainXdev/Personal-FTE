@@ -50,3 +50,25 @@ htmlcov/
 *.temp
 tmp/
 temp/
+
+# ===========================================
+# SENSITIVE CREDENTIALS (DO NOT COMMIT)
+# ===========================================
+
+# Gmail OAuth tokens
+AI_Employee_Vault/Skills/gmail_token.json
+AI_Employee_Vault/Skills/gmail_credentials.json
+
+# LinkedIn session cookies
+AI_Employee_Vault/Skills/linkedin_cookies.json
+AI_Employee_Vault/Skills/linkedin_session.json
+
+# Any other credential files
+AI_Employee_Vault/Skills/*credentials*.json
+AI_Employee_Vault/Skills/*token*.json
+AI_Employee_Vault/Skills/*cookies*.json
+
+# Backup files with potential secrets
+*.bak
+*.backup
+*.old

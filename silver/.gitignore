@@ -72,3 +72,4 @@ AI_Employee_Vault/Skills/*cookies*.json
 *.bak
 *.backup
 *.old
+credentials.json

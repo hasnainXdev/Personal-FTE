@@ -1,9 +1,0 @@
-# AI Employee Vault - Development Requirements
-# Install with: pip install -r requirements-dev.txt
-
--r requirements.txt
-
-# Additional dev tools
-mypy
-ruff
-coverage

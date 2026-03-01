@@ -1,399 +1,342 @@
-# 🥈 Silver Tier - COMPLETE
+# AI Employee - Silver Tier Orchestration
 
-**Personal AI Employee Hackathon 2026**
-*Powered by Qwen | Real Gmail API | Real LinkedIn Posting | Playwright Automation*
-
----
-
-## ✅ Complete Implementation
-
-This is the **fully functional** Silver Tier with:
-
-| Feature | Status | Implementation |
-|---------|--------|----------------|
-| Gmail Fetch | ✅ Working | OAuth2 + Gmail API |
-| Gmail Send | ✅ Working | Gmail API with scopes |
-| LinkedIn Post | ✅ Working | Playwright browser automation |
-| File System | ✅ Working | Watchdog-based monitoring |
-| MCP Server | ✅ Working | Full tool integration |
-| Approval Workflow | ✅ Working | Human-in-the-loop |
-| Scheduler | ✅ Working | Cron-based tasks |
-| Daily Briefings | ✅ Working | Auto-generated summaries |
+**Version**: 0.1.0
+**Tier**: Silver (Functional Assistant with Orchestration)
+**Foundation**: Bronze Tier (Reactive Task Processor)
 
 ---
 
-## 🚀 Quick Start
+## Overview
 
-### 1. Install Dependencies
+Silver Tier upgrades the AI Employee from a reactive task processor to an autonomous functional assistant with:
 
-```bash
-cd silver
-pip install -e .
-playwright install chromium
+- **Multi-Channel Input**: Gmail and Filesystem watchers for automatic input capture
+- **Structured Planning**: Plan.md generation for complex workflows
+- **Human-in-the-Loop**: Approval workflow for high-risk and external actions
+- **MCP Server**: Centralized external action boundary (email, LinkedIn, webhooks)
+- **Scheduling**: Cron-based autonomous task execution
+- **Skill Chaining**: Orchestrator for coordinated multi-skill workflows
+
+---
+
+## Architecture
+
 ```
-
-### 2. Setup Gmail (5 minutes)
-
-```bash
-# Follow COMPLETE_SETUP.md or run:
-./setup_gmail.sh
-
-# This will:
-# 1. Check credentials.json
-# 2. Open browser for OAuth
-# 3. Save token automatically
-```
-
-### 3. Setup LinkedIn (2 minutes)
-
-```bash
-# Run setup script
-./setup_linkedin.sh
-
-# This will:
-# 1. Install Playwright browsers
-# 2. Open LinkedIn login
-# 3. Save session automatically
-```
-
-### 4. Start the System
-
-```bash
-# Terminal 1: Watchers (Gmail + File)
-python3 src/main.py --vault ./AI_Employee_Vault --mode watchers
-
-# Terminal 2: Scheduler
-python3 src/main.py --vault ./AI_Employee_Vault --mode scheduler
-
-# Terminal 3: MCP Server
-python3 mcp_server/server.py ./AI_Employee_Vault
+┌─────────────────────────────────────────────────────────────┐
+│                     Silver Tier Layer                        │
+├─────────────────────────────────────────────────────────────┤
+│  Watchers        │  Scheduler      │  Services              │
+│  - Gmail         │  - Cron Runner  │  - Plan Generator      │
+│  - Filesystem    │  - Daily Summary│  - Approval Request    │
+│                  │                 │  - Orchestrator        │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     Bronze Tier Layer                        │
+├─────────────────────────────────────────────────────────────┤
+│  Inbox Intake → Task Classifier → State Mover → Summarizer  │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      MCP Server                              │
+├─────────────────────────────────────────────────────────────┤
+│  Email │ LinkedIn │ Webhook │ (All external actions)        │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📋 Features
+## Quick Start
 
-### 📧 Gmail Integration
+### 1. Prerequisites
 
-**Fetch Emails:**
-- Monitors Gmail every 2 minutes
-- Creates action files for unread emails
-- Classifies by priority (high/medium/low)
+- Python 3.11+
+- UV package manager
+- WSL Ubuntu (for Windows users)
+- Bronze Tier operational
 
-**Send Emails:**
-```python
-# Via MCP tool
-send_email(
-    to="client@example.com",
-    subject="Re: Invoice Request",
-    body="Dear Client, Thank you for your email...",
-    skip_approval=False  # Creates approval request
-)
+### 2. Installation
+
+```bash
+cd /mnt/d/it-course/hackathons/personal-FTE/silver
+
+# Activate UV environment
+uv python install 3.11
+uv venv
+source .venv/bin/activate
+
+# Install dependencies
+uv sync
 ```
 
-**OAuth Scopes:**
-- `gmail.readonly` - Read emails
-- `gmail.labels` - Manage labels
-- `gmail.send` - Send emails
-- `gmail.compose` - Draft emails
+### 3. Configuration
 
-### 🔗 LinkedIn Integration
+```bash
+# Copy environment template
+cp .env.example .env
 
-**Post Updates:**
-```python
-# Via MCP tool
-post_linkedin(
-    content="🚀 Exciting business update!",
-    reason="Q1 achievements",
-    skip_approval=False
-)
+# Edit .env with your credentials
+nano .env
 ```
 
-**Features:**
-- Real browser automation via Playwright
-- Persistent session (login once)
-- Rate limiting (max 3 posts/day)
-- Draft approval workflow
+Required credentials:
+- Gmail OAuth (for Gmail watcher)
+- SMTP credentials (for email actions)
+- LinkedIn access token (for LinkedIn automation)
 
-### 📁 File System
+### 4. Start MCP Server
 
-**Monitor Folders:**
-- `/Inbox` - Primary drop folder
-- `/Inbox_Drop` - Secondary drop folder
+```bash
+cd ai_employee/mcp_server
+uv run python -m ai_employee.mcp_server.server
+```
 
-**Processing:**
-- Detects new files every 30 seconds
-- Creates action files with metadata
-- Classifies by content priority
+Verify:
+```bash
+curl http://localhost:8765/health
+```
 
-### 🔌 MCP Server Tools
+### 5. Configure Watchers
 
-| Tool | Description |
-|------|-------------|
-| `send_email` | Send via Gmail API |
-| `post_linkedin` | Post via Playwright |
-| `create_approval_request` | Create approval file |
-| `check_approvals` | Check pending approvals |
-| `update_dashboard` | Update Dashboard.md |
-| `linkedin_login` | Initialize LinkedIn session |
+```bash
+# Test Gmail watcher
+uv run python -m ai_employee.watchers.gmail_watcher --test
+
+# Test Filesystem watcher
+echo "Test content" > AI_Employee_Vault/Inbox_Drop/test.txt
+uv run python -m ai_employee.watchers.filesystem_watcher --test
+```
+
+### 6. Configure Scheduling
+
+```bash
+# Edit crontab
+crontab -e
+
+# Add entries (see Scheduled_Tasks/ for examples)
+```
 
 ---
 
-## 📁 Complete Structure
+## Project Structure
 
 ```
 silver/
-├── credentials.json          # Gmail OAuth (you create)
-├── .env                      # Optional environment vars
-├── pyproject.toml            # Python dependencies
-├── README.md                 # This file
-├── COMPLETE_SETUP.md         # Detailed setup guide
-├── setup_gmail.sh            # Gmail setup script
-├── setup_linkedin.sh         # LinkedIn setup script
-├── test_linkedin.py          # LinkedIn test script
-├── test_all_features.sh      # Complete test suite
+├── ai_employee/                 # Silver Tier code
+│   ├── mcp_server/              # MCP server (external actions)
+│   │   ├── actions/             # Action handlers
+│   │   │   ├── email.py
+│   │   │   ├── linkedin.py
+│   │   │   └── webhook.py
+│   │   ├── logs/                # MCP action logs
+│   │   └── __init__.py          # Server definition
+│   ├── watchers/                # Input channel watchers
+│   │   ├── base_watcher.py      # Abstract base class
+│   │   ├── gmail_watcher.py
+│   │   └── filesystem_watcher.py
+│   ├── scheduler/               # Scheduling layer
+│   │   ├── cron_runner.py
+│   │   └── daily_summary.py
+│   └── services/                # Business logic services
+│       ├── plan_generator.py
+│       ├── approval_request.py
+│       └── orchestrator.py
 │
-├── AI_Employee_Vault/        # Obsidian vault
-│   ├── token.json          # Gmail OAuth token
-│   ├── .linkedin_session/    # LinkedIn browser session
-│   ├── Inbox/                # Primary drop folder
-│   ├── Inbox_Drop/           # Secondary drop folder
-│   ├── Needs_Action/         # Items to process
-│   ├── Pending_Approval/     # Awaiting approval
-│   ├── Approved/             # Approved actions
-│   ├── Rejected/             # Declined actions
-│   ├── Done/                 # Completed items
-│   ├── Plans/                # Multi-step plans
-│   ├── Scheduled_Tasks/      # Cron task definitions
-│   ├── Logs/                 # Activity logs
-│   ├── Briefings/            # Daily summaries
-│   ├── Dashboard.md          # Real-time status
-│   ├── Company_Handbook.md   # AI behavior rules
-│   └── Agent_Skills.md       # 14 capabilities
+├── AI_Employee_Vault/           # Obsidian vault (immutable structure)
+│   ├── Skills/
+│   │   ├── Bronze/              # UNCHANGED - foundation
+│   │   └── Silver/              # NEW - orchestration skills
+│   ├── Inbox/                   # Bronze intake (unchanged)
+│   ├── Needs_Action/            # Bronze (unchanged)
+│   ├── Done/                    # Bronze (unchanged)
+│   ├── Plans/                   # NEW - Plan.md storage
+│   ├── Proposed_Actions/        # NEW - approval workflow
+│   ├── Scheduled_Tasks/         # NEW - scheduled task configs
+│   ├── Logs_Extended/           # NEW - detailed logs
+│   └── Dashboard.md             # EXTENDED - new log sections
 │
-├── src/
-│   ├── main.py               # Main entry point
-│   ├── watchers/
-│   │   ├── base_watcher.py   # Base class
-│   │   ├── gmail_watcher.py  # Gmail API (fetch + send)
-│   │   └── filesystem_watcher.py  # File monitoring
-│   ├── services/
-│   │   ├── linkedin_service.py  # LinkedIn Playwright
-│   │   ├── approval_service.py  # HITL workflow
-│   │   └── plan_service.py      # Plan generation
-│   └── scheduler/
-│       ├── cron_runner.py    # Cron scheduler
-│       └── daily_summary.py  # Daily briefings
+├── specs/002-silver-tier-orchestration/  # Feature documentation
+│   ├── spec.md                   # Specification
+│   ├── plan.md                   # Implementation plan
+│   ├── tasks.md                  # Task breakdown
+│   ├── data-model.md             # Entity definitions
+│   ├── research.md               # Design decisions
+│   ├── quickstart.md             # Setup guide
+│   └── contracts/                # API contracts
 │
-└── mcp_server/
-    ├── server.py             # MCP server
-    └── actions/
-        ├── email.py          # Email actions
-        └── linkedin.py       # LinkedIn actions
+├── .env.example                  # Environment template
+├── pyproject.toml                # Python project config
+└── README.md                     # This file
 ```
 
 ---
 
-## 🧪 Testing
+## User Stories
+
+### US1: Multi-Channel Input Processing 🎯 MVP
+
+**Goal**: Implement 2+ independent watchers that route to Bronze Inbox without interference
+
+**Test**: Configure both watchers, trigger inputs on both channels within same minute, verify both logged in Dashboard.md and processed through Bronze intake without data loss or duplication
+
+### US2: Structured Plan Generation
+
+**Goal**: Automatic Plan.md generation for multi-step tasks, external actions, and high-risk workflows
+
+**Test**: Trigger a task requiring multiple steps, verify Plan.md is created with objective, steps, expected outcome, and risk level before any execution begins
+
+### US3: Human Approval Workflow
+
+**Goal**: Prevent unsafe auto-execution by requiring human approval for external actions
+
+**Test**: Trigger an action requiring approval (e.g., LinkedIn post), verify Proposed_Action.md is created, wait for manual approval marking, then verify execution only proceeds after "Approved: Yes" is set
+
+### US4: LinkedIn Content Automation
+
+**Goal**: Generate LinkedIn post drafts, route through approval, execute via MCP, store post URL
+
+**Test**: Request LinkedIn post generation, verify draft is saved, approve it, verify post is published via MCP, verify LinkedIn URL is stored in vault
+
+### US5: Scheduled Autonomous Workflows
+
+**Goal**: Execute routine tasks on schedule (daily summaries, periodic scanning) without user initiation
+
+**Test**: Configure a scheduled task (e.g., daily inbox scan at 9 AM), verify it triggers automatically at the scheduled time and logs execution in Dashboard.md
+
+### US6: External Action Execution via MCP
+
+**Goal**: Centralize all external actions through MCP server for logging, audit, and safety
+
+**Test**: Trigger an external action (e.g., send email), verify it routes through MCP server, verify action is logged with full context, verify no direct API calls bypass MCP
+
+### US7: Skill Chaining and Orchestration
+
+**Goal**: Chain multiple skills together in defined sequence for complex workflows
+
+**Test**: Trigger a workflow requiring skill chaining, verify each skill executes in declared order, verify dependencies are respected, verify no implicit chaining occurs
+
+---
+
+## Environment Variables
+
+```bash
+# MCP Server
+MCP_PORT=8765
+MCP_HOST=localhost
+
+# Gmail OAuth
+GMAIL_OAUTH_TOKEN=
+GMAIL_REFRESH_TOKEN=
+GMAIL_CLIENT_ID=
+GMAIL_CLIENT_SECRET=
+
+# SMTP
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+
+# LinkedIn
+LINKEDIN_ACCESS_TOKEN=
+LINKEDIN_ORGANIZATION_ID=
+```
+
+---
+
+## Troubleshooting
+
+### Watcher Not Triggering
+
+**Check**:
+```bash
+# Check cron logs
+grep CRON /var/log/syslog
+
+# Check watcher logs
+tail -f AI_Employee_Vault/Logs_Extended/watcher_*.md
+
+# Test manually
+uv run python -m ai_employee.watchers.gmail_watcher --verbose
+```
+
+### MCP Server Unreachable
+
+**Check**:
+```bash
+# Is server running?
+ps aux | grep mcp_server
+
+# Check port
+netstat -tlnp | grep 8765
+
+# Test health endpoint
+curl http://localhost:8765/health
+```
+
+### Approval Not Detected
+
+**Check**:
+```bash
+# Verify file format
+cat Proposed_Actions/Action_*.md
+
+# Check for "Approved: Yes" exactly
+grep "Approved: Yes" Proposed_Actions/Action_*.md
+```
+
+### Bronze Regression
+
+**Action**: STOP immediately. Constitution violation detected.
+
+**Recovery**:
+```bash
+# Revert Silver changes
+git stash
+
+# Verify Bronze functionality
+
+# Re-apply Silver changes incrementally
+git stash pop
+```
+
+---
+
+## Testing
 
 ### Run All Tests
 
 ```bash
-./test_all_features.sh
+cd /mnt/d/it-course/hackathons/personal-FTE/silver
+uv run pytest
 ```
 
-### Test Gmail Send
+### Manual Scenario Testing
 
-```bash
-python3 << 'EOF'
-from src.watchers.gmail_watcher import GmailWatcher
-g = GmailWatcher('AI_Employee_Vault', 'credentials.json')
-result = g.send_email(
-    to="your-email@gmail.com",
-    subject="Test",
-    body="Test from Silver Tier"
-)
-print(result)
-EOF
-```
-
-### Test LinkedIn Post
-
-```bash
-python3 test_linkedin.py
-```
+See `specs/002-silver-tier-orchestration/quickstart.md` for validation checklists per user story.
 
 ---
 
-## 📊 Agent Skills (14 Total)
+## Contributing
 
-### Bronze (7)
-1. Inbox Intake Processor
-2. Task Classifier
-3. Task Summarizer
-4. Dashboard Updater
-5. Task State Mover
-6. Duplicate Detector
-7. Completion Evaluator
-
-### Silver (7 New)
-8. **Gmail Watcher** - Fetch emails via API
-9. **Gmail Sender** - Send emails via API
-10. **LinkedIn Poster** - Post via Playwright
-11. **Plan Generator** - Multi-step planning
-12. **Approval Workflow** - Human-in-the-loop
-13. **Scheduler** - Cron-based tasks
-14. **Daily Summary** - Auto briefings
+1. Create feature branch
+2. Implement changes
+3. Run tests
+4. Update documentation
+5. Submit PR
 
 ---
 
-## 🔐 Security
+## License
 
-### Credentials
-
-| File | Purpose | Commit? |
-|------|---------|---------|
-| `credentials.json` | Gmail OAuth | ❌ Never |
-| `token.json` | Gmail token | ❌ Never |
-| `.linkedin_session/` | LinkedIn session | ❌ Never |
-| `.env` | Environment vars | ❌ Never |
-
-### Approval Requirements
-
-| Action | Approval |
-|--------|----------|
-| Email send (new recipient) | Required |
-| Email send (known recipient) | Optional |
-| LinkedIn post | Always required |
-| Payment > $50 | Always required |
-| File delete | Always required |
+Internal use only - AI Employee Project
 
 ---
 
-## 🐛 Troubleshooting
+## Support
 
-### Gmail: redirect_uri_mismatch
-
-**Error:** `Error 400: redirect_uri_mismatch`
-
-**Fix:**
-1. Go to Google Cloud Console
-2. APIs & Services → Credentials
-3. Edit your OAuth client
-4. Add redirect URI: `http://localhost:8085/callback`
-5. Save and wait 5-10 minutes
-
-### Gmail: Insufficient scopes
-
-**Error:** `Insufficient scopes for operation`
-
-**Fix:**
-1. Delete `AI_Employee_Vault/token.json`
-2. Add scopes to OAuth consent screen:
-   - `gmail.send`
-   - `gmail.compose`
-3. Re-run: `./setup_gmail.sh`
-
-### LinkedIn: Not logged in
-
-**Error:** `Not logged into LinkedIn`
-
-**Fix:**
-```bash
-python3 test_linkedin.py
-# Log in manually in browser
-# Session saves automatically
-```
-
-### Playwright: Browser errors
-
-**Error:** `Browser executable not found`
-
-**Fix:**
-```bash
-playwright install chromium
-```
-
----
-
-## 📚 Documentation
-
-| File | Purpose |
-|------|---------|
-| `COMPLETE_SETUP.md` | Complete setup guide |
-| `TESTING_GUIDE.md` | Hands-on testing |
-| `QUICK_REFERENCE.md` | Quick commands |
-| `GMAIL_SETUP.md` | Gmail integration |
-| `Agent_Skills.md` | 14 capabilities |
-| `Company_Handbook.md` | AI behavior rules |
-
----
-
-## 🎯 What's Working
-
-### ✅ Gmail API
-- [x] Fetch unread emails
-- [x] Classify by priority
-- [x] Create action files
-- [x] Send emails via API
-- [x] Log sent emails
-- [x] Mark as read
-
-### ✅ LinkedIn
-- [x] Browser automation
-- [x] Persistent session
-- [x] Post updates
-- [x] Rate limiting
-- [x] Draft approval
-- [x] Activity logging
-
-### ✅ File System
-- [x] Monitor folders
-- [x] Detect new files
-- [x] Create action files
-- [x] Priority classification
-- [x] Duplicate prevention
-
-### ✅ MCP Server
-- [x] send_email tool
-- [x] post_linkedin tool
-- [x] create_approval_request
-- [x] check_approvals
-- [x] update_dashboard
-- [x] linkedin_login
-
-### ✅ Approval Workflow
-- [x] Create approval files
-- [x] Human review
-- [x] Execute approved
-- [x] Archive rejected
-- [x] Activity logging
-
-### ✅ Scheduler
-- [x] Cron-based tasks
-- [x] Daily briefings
-- [x] Task persistence
-- [x] Execution logging
-
----
-
-## 🏆 Silver Tier Complete!
-
-**All requirements met:**
-- ✅ Gmail Watcher with OAuth2
-- ✅ Gmail Send with API
-- ✅ LinkedIn Poster with Playwright
-- ✅ MCP Server for actions
-- ✅ Plan Generator
-- ✅ Approval Workflow
-- ✅ Scheduler
-- ✅ Daily Summary
-- ✅ 14 Agent Skills
-- ✅ Complete documentation
-
----
-
-*Built for the Personal AI Employee Hackathon 2026*
-*Powered by Qwen - Local-first, Agent-driven, Human-in-the-loop*
-
-**Tagline:** Your life and business on autopilot.
+- **Spec**: `specs/002-silver-tier-orchestration/spec.md`
+- **Plan**: `specs/002-silver-tier-orchestration/plan.md`
+- **Quickstart**: `specs/002-silver-tier-orchestration/quickstart.md`
+- **Data Model**: `specs/002-silver-tier-orchestration/data-model.md`

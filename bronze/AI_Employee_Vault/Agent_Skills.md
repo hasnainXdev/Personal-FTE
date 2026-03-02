@@ -1,105 +1,102 @@
-# Agent Skills
+---
+version: 1.0
+tier: Bronze
+ai_engine: Qwen
+---
 
-This document defines all agent skills that the AI Employee can execute.
-Each skill follows a standardized format with input/output specifications.
+# 🤖 Agent Skills
+
+This document defines all AI capabilities available in Bronze Tier, powered by **Qwen**.
+
+## Skill 1: Inbox Intake Processor
+
+**Purpose**: Process files dropped in /Inbox and move to appropriate folders
+
+**Trigger**: File appears in /Inbox
+
+**Actions**:
+1. Read file content
+2. Classify type (task, note, reference)
+3. Add metadata frontmatter
+4. Move to /Needs_Action/ or /Done/
 
 ---
 
-## Skill: ProcessFile
+## Skill 2: Task Classifier
 
-- **Purpose**: Process markdown files from filesystem input source
-- **Input Format**:
-  ```json
-  {
-    "file_path": "/absolute/path/to/file.md",
-    "content": "markdown content string"
-  }
-  ```
-- **Output Format**: Markdown file created in appropriate vault folder (Inbox/)
-- **Invocation Method**: `python -m ai_employee.skills.process_file <file_path>`
-- **Expected Behavior**:
-  1. Read the input file
-  2. Validate markdown content
-  3. Generate unique ID (SHA256 hash of content)
-  4. Check for duplicates (idempotency)
-  5. Write to Inbox/ folder
-  6. Log operation to Dashboard.md
-- **Failure Handling Notes**:
-  - If file not found: Log error, skip processing
-  - If invalid markdown: Log error, move to Needs_Action for manual review
-  - If duplicate detected: Log as skipped, no action taken
-  - If write fails: Log error, retry with exponential backoff (3 attempts)
+**Purpose**: Categorize items in /Needs_Action by priority and type
+
+**Trigger**: New item in /Needs_Action
+
+**Classification Types**:
+- `email` - Email communications
+- `file_drop` - Dropped files for processing
+- `task` - Action items
+- `reference` - Information only
+
+**Priority Levels**:
+- `high` - Urgent/ASAP keywords
+- `medium` - Normal tasks
+- `low` - Reference/archive
 
 ---
 
-## Skill: ProcessEmail (Gmail Support)
+## Skill 3: Task Summarizer
 
-- **Purpose**: Process emails from Gmail inbox
-- **Input Format**:
-  ```json
-  {
-    "from": "sender @example.com",
-    "subject": "Email subject line",
-    "body": "Email body content",
-    "received_at": "2026-02-16T10:30:00Z",
-    "message_id": "<unique-message-id @gmail.com>"
-  }
-  ```
-- **Output Format**: Markdown file created in Inbox/ with email metadata
-- **Invocation Method**: `python -m ai_employee.skills.process_email`
-- **Expected Behavior**:
-  1. Connect to Gmail via IMAP
-  2. Fetch unread emails
-  3. Parse email content and metadata
-  4. Create markdown file with email content
-  5. Write to Inbox/ folder
-  6. Mark email as read
-  7. Log operation to Dashboard.md
-- **Failure Handling Notes**:
-  - If IMAP connection fails: Retry with exponential backoff
-  - If email parse fails: Log error, skip email
-  - If write fails: Log error, retain email as unread for retry
+**Purpose**: Create summaries of task content for Dashboard
+
+**Input**: Any .md file in vault
+
+**Output**: 2-3 line summary for Dashboard activity log
 
 ---
 
-## Skill: ExtractTasks
+## Skill 4: Dashboard Updater
 
-- **Purpose**: Extract actionable tasks from markdown content
-- **Input Format**: Markdown file path containing potential tasks
-- **Output Format**: Structured task list in markdown format
-- **Invocation Method**: `python -m ai_employee.skills.extract_tasks <file_path>`
-- **Expected Behavior**:
-  1. Read input markdown file
-  2. Identify task-like patterns (checkboxes, action items)
-  3. Extract and format as structured task list
-  4. Update original file with extracted tasks
-  5. Move file to Needs_Action/ if tasks require action
-  6. Log operation to Dashboard.md
-- **Failure Handling Notes**:
-  - If no tasks found: Log as informational, move to Done/
-  - If parse fails: Log error, keep in Inbox for manual review
+**Purpose**: Keep Dashboard.md current with latest activity
+
+**Trigger**: After any task completion
+
+**Updates**:
+- Increment completed count
+- Add activity row
+- Update timestamp
 
 ---
 
-## Adding New Skills
+## Skill 5: Task State Mover
 
-To add a new agent skill:
+**Purpose**: Move tasks between folders based on state
 
-1. Create a new section in this file with the skill definition
-2. Implement the skill in `src/ai_employee/skills/` directory
-3. Register the skill in the skill executor
-4. Test the skill with sample inputs
-5. Update documentation
-
-### Skill Template
-
-```markdown
-## Skill: [Skill Name]
-
-- **Purpose**: [What this skill does]
-- **Input Format**: [Expected input structure with example]
-- **Output Format**: [Produced output structure with example]
-- **Invocation Method**: [How to call this skill]
-- **Expected Behavior**: [Step-by-step normal operation]
-- **Failure Handling Notes**: [Error recovery steps]
+**State Flow**:
 ```
+/Needs_Action/ → /Done/ (complete)
+/Pending_Approval/ → /Approved/ (human approved)
+/Pending_Approval/ → /Rejected/ (human declined)
+```
+
+---
+
+## Skill 6: Duplicate Detector
+
+**Purpose**: Prevent processing same item twice
+
+**Check**: Compare against processed IDs in logs
+
+**Action**: Skip if already processed, alert if uncertain
+
+---
+
+## Skill 7: Completion Evaluator
+
+**Purpose**: Verify task is actually complete before moving to /Done/
+
+**Checklist**:
+- [ ] All subtasks done?
+- [ ] Results documented?
+- [ ] Dashboard updated?
+- [ ] Log entry created?
+
+---
+
+*To add new skills, create a SKILL.md file with the same structure*

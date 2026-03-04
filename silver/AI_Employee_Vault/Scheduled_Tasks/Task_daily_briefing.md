@@ -3,9 +3,9 @@ type: scheduled_task
 name: daily_briefing
 cron: 0 8 * * *
 enabled: true
-created: 2026-03-02T02:24:29.012909
+created: 2026-03-02T22:52:43.602446
 last_run: never
-next_run: 2026-03-02T08:00:00
+next_run: 2026-03-03T08:00:00
 ---
 
 # Scheduled Task: daily_briefing

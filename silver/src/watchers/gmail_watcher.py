@@ -269,8 +269,8 @@ mock_mode: true
 *Created by GmailWatcher (MOCK MODE)*
 *Email ID: {message_id}*
 """
-        
-        meta_path.write_text(content)
+
+        meta_path.write_text(content, encoding='utf-8')
         self.logger.info(f"Created mock action file: {meta_path.name}")
         
         return meta_path
@@ -349,8 +349,8 @@ labels: unread
 *Created by GmailWatcher*
 *Gmail ID: {message_id}*
 """
-            
-            meta_path.write_text(content)
+
+            meta_path.write_text(content, encoding='utf-8')
             self.logger.info(f"Created action file: {meta_path.name}")
             
             return meta_path
@@ -478,8 +478,8 @@ labels: unread
 """
         
         if log_file.exists():
-            content = log_file.read_text()
-            log_file.write_text(content + entry)
+            content = log_file.read_text(encoding='utf-8')
+            log_file.write_text(content + entry, encoding='utf-8')
         else:
             log_file.write_text(f"""---
 type: email_sent_log
@@ -488,4 +488,4 @@ date: {today}
 
 # Emails Sent - {today}
 {entry}
-""")
+""", encoding='utf-8')

@@ -1,0 +1,89 @@
+# Gold Tier AI Employee - .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Environment Variables (CRITICAL - Never commit!)
+.env
+.env.local
+.env.*.local
+credentials/
+*.pem
+*.key
+token.pickle
+*_token.json
+session*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Obsidian Vault - Sensitive (sync only non-sensitive files)
+AI_Employee_Vault/credentials/
+AI_Employee_Vault/*.key
+AI_Employee_Vault/*.pem
+
+# Logs
+*.log
+logs/
+AI_Employee_Vault/Logs/*.log
+
+# Test Coverage
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+
+# Build
+*.manifest
+*.spec
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Odoo
+*.pyc
+.filestore/
+odoo-session/
+
+# Playwright
+.playwright/
+browser_sessions/
+
+# MCP Server
+mcp_server/node_modules/
+
+# Documentation build
+docs/_build/

@@ -1,13 +1,158 @@
 # Qwen Commands Quick Reference
 
+## Gold Tier Overview
+
+**Gold Tier = Silver Features + Odoo + Facebook**
+
+| Category         | Tools Available                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| **Email**        | `send_email` (Gmail API)                                         |
+| **Social Media** | `post_linkedin`, `post_facebook`                                 |
+| **Accounting**   | `create_odoo_invoice`, `record_odoo_payment`                     |
+| **Workflow**     | `create_approval_request`, `check_approvals`, `update_dashboard` |
+
+**Skipped:** WhatsApp, Instagram, Twitter/X (per requirements)
+
+---
+
 ## Setup
 
-Add Qwen to your PATH (if not already):
+### 1. Configure Environment
 
 ```bash
-# Add to ~/.bashrc or ~/.zshsc
-export PATH="$PATH:/path/to/qwen"
+cd gold
+cp .env.example .env
+# Edit .env with your credentials
 ```
+
+### 2. Required .env Configuration
+
+```env
+# Odoo (Accounting)
+ODOO_URL=http://localhost:8069
+ODOO_DB=your_database
+ODOO_USERNAME=admin
+ODOO_API_KEY=your_api_key
+
+# Gmail (Email)
+GMAIL_CLIENT_ID=your_client_id
+GMAIL_CLIENT_SECRET=your_client_secret
+GMAIL_REDIRECT_URI=http://localhost:8080
+
+# System
+VAULT_PATH=./AI_Employee_Vault
+LOG_LEVEL=INFO
+```
+
+### 3. Install Dependencies
+
+```bash
+uv sync
+playwright install  # For LinkedIn automation
+```
+
+### 4. Start Components
+
+```bash
+# Terminal 1: Watchers (File System + Gmail)
+python -m src.main --vault ./AI_Employee_Vault --mode watchers
+
+# Terminal 2: Scheduler (Daily Briefing, Weekly Audit)
+python -m src.main --vault ./AI_Employee_Vault --mode scheduler
+
+# Terminal 3: MCP Server (API for tools)
+python -m src.main --vault ./AI_Employee_Vault --mode mcp
+
+# Terminal 4: Qwen Orchestrator (Auto-invokes Qwen every 30s)
+python -m src.services.qwen_orchestrator --vault ./AI_Employee_Vault --interval 30
+```
+
+---
+
+## File System Watcher Usage
+
+The Gold tier uses a **File System Watcher** pattern. Drop files into `Inbox/` and they're automatically processed.
+
+### How It Works
+
+```
+1. Drop file → AI_Employee_Vault/Inbox/
+2. FileSystemWatcher detects (real-time via Watchdog)
+3. Creates action file → AI_Employee_Vault/Needs_Action/FILE_*.md
+4. Qwen orchestrator processes the action file
+5. Creates approval requests in /Pending_Approval/
+6. Human approves (move to /Approved/)
+7. Action executed, moved to /Done/
+```
+
+### Usage Examples
+
+```bash
+# Drop a file
+cp invoice.pdf AI_Employee_Vault/Inbox/
+
+# Watcher auto-creates: Needs_Action/FILE_invoice_abc123.md
+
+# Process with Qwen (manual)
+qwen "Read Company_Handbook.md, then process /Needs_Action"
+
+# Or wait for orchestrator (auto-checks every 30 seconds)
+```
+
+### Create Request Files Manually
+
+```bash
+# Facebook post request
+cat > AI_Employee_Vault/Needs_Action/SOCIAL_facebook_post.md << 'EOF'
+---
+type: social_media_request
+platform: facebook
+priority: normal
+---
+
+Create a post about our Q1 achievements
+EOF
+
+# Invoice request
+cat > AI_Employee_Vault/Needs_Action/INVOICE_client_xyz.md << 'EOF'
+---
+type: invoice_request
+client: XYZ Corporation
+client_email: billing@xyzcorp.com
+amount: 2500
+description: Consulting services - January 2026
+due_date: 2026-02-15
+---
+
+Please create and send invoice
+EOF
+
+# Email processing request
+cat > AI_Employee_Vault/Needs_Action/EMAIL_followup.md << 'EOF'
+---
+type: email_request
+to: client@example.com
+priority: high
+---
+
+Send a follow-up email about the pending invoice
+EOF
+```
+
+---
+
+## MCP Tools Reference
+
+| Tool | Description | Approval Required |
+|------|-------------|-------------------|
+| `send_email` | Send emails via Gmail API | First time |
+| `post_linkedin` | Post to LinkedIn | Always |
+| `post_facebook` | Post to Facebook | Always |
+| `create_approval_request` | Create approval file | No |
+| `check_approvals` | Check pending approvals | No |
+| `update_dashboard` | Update Dashboard.md | No |
+| `create_odoo_invoice` | Create Odoo invoice | Yes |
+| `record_odoo_payment` | Record Odoo payment | Yes |
 
 ---
 
@@ -40,13 +185,16 @@ qwen "Find emails from client@example.com in /Needs_Action and draft replies"
 
 ```bash
 # Create Facebook post from request
-qwen "Read /Needs_Action/SOCIAL_*.md and create Facebook post drafts in /Pending_Approval"
+qwen "Read /Needs_Action/SOCIAL_facebook_*.md and create Facebook post drafts in /Pending_Approval"
 
 # Generate LinkedIn business post
-qwen "Create a LinkedIn post about our Q1 business achievements and save to /Pending_Approval"
+qwen "Create a LinkedIn post about our Q1 business achievements, save draft to /Pending_Approval"
 
 # Generate multiple social posts
-qwen "Generate 3 Facebook posts and 2 LinkedIn posts for this week's business updates and save to /Needs_Action"
+qwen "Generate 3 Facebook posts and 2 LinkedIn posts for this week's business updates"
+
+# Create post from scratch
+qwen "Create a Facebook post about our new product launch, save to /Pending_Approval"
 ```
 
 ---
@@ -55,13 +203,19 @@ qwen "Generate 3 Facebook posts and 2 LinkedIn posts for this week's business up
 
 ```bash
 # Process invoice request
-qwen "Read /Needs_Action/INVOICE_*.md, create invoices in Odoo, and prepare approval requests"
+qwen "Read /Needs_Action/INVOICE_*.md, create invoices in Odoo, prepare approval requests"
 
 # Create invoice for specific client
-qwen "Create an Odoo invoice for ABC Corp, $2500, due Net 15, and draft email to send"
+qwen "Create an Odoo invoice for ABC Corp, $2500, due Net 15, draft email to send"
 
 # Process all pending invoices
 qwen "Check /Needs_Action for invoice requests and create them in Odoo"
+
+# Record payment
+qwen "Record $2500 payment for invoice #INV-2026-001 in Odoo"
+
+# Get invoice status
+qwen "Check payment status of invoice #INV-2026-001 in Odoo"
 ```
 
 ---
@@ -233,13 +387,19 @@ qwen "Update Dashboard.md with current status"
 ## Qwen + Watchers Workflow
 
 ```bash
-# Terminal 1: Start watchers
+# Terminal 1: Start watchers (File System + Gmail)
 python -m src.main --vault ./AI_Employee_Vault --mode watchers
 
-# Terminal 2: Start scheduler
+# Terminal 2: Start scheduler (Daily Briefing, Weekly Audit)
 python -m src.main --vault ./AI_Employee_Vault --mode scheduler
 
-# Terminal 3: Manual Qwen processing (run as needed)
+# Terminal 3: Start MCP server (Tool API)
+python -m src.main --vault ./AI_Employee_Vault --mode mcp
+
+# Terminal 4: Qwen orchestrator (auto-invokes Qwen every 30s)
+python -m src.services.qwen_orchestrator --vault ./AI_Employee_Vault --interval 30
+
+# Or manual Qwen processing (run as needed)
 qwen "Process /Needs_Action"
 ```
 
@@ -253,6 +413,24 @@ python -m src.main --vault ./AI_Employee_Vault --mode mcp
 
 # Terminal 2: Use Qwen with MCP tools
 qwen "Use MCP tools to send email, create Odoo invoice, and post to Facebook"
+```
+
+---
+
+## Testing
+
+```bash
+# Run all tests
+pytest tests/test_gold_tier.py -v
+
+# Validate Gold Tier
+python3 validate_gold_tier.py
+
+# Test Odoo connection
+uv run test_odoo.py
+
+# Check vault structure
+ls -la AI_Employee_Vault/
 ```
 
 ---

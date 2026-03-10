@@ -70,9 +70,7 @@ def run_mcp_server(vault_path: str) -> None:
                 'tools': [
                     {'name': 'send_email', 'description': 'Send an email'},
                     {'name': 'post_linkedin', 'description': 'Post to LinkedIn'},
-                    {'name': 'post_twitter', 'description': 'Post to Twitter/X'},
                     {'name': 'post_facebook', 'description': 'Post to Facebook'},
-                    {'name': 'post_instagram', 'description': 'Post to Instagram'},
                     {'name': 'create_approval_request', 'description': 'Create approval request'},
                     {'name': 'check_approvals', 'description': 'Check pending approvals'},
                     {'name': 'update_dashboard', 'description': 'Update dashboard'},
@@ -92,42 +90,38 @@ def run_mcp_server(vault_path: str) -> None:
 async def execute_tool(tool_name: str, params: Dict[str, Any], vault_path: Path) -> Any:
     """
     Execute a tool
-    
+
     Args:
         tool_name: Name of tool to execute
         params: Tool parameters
         vault_path: Path to vault
-        
+
     Returns:
         Tool result
     """
     from .mcp.tools import (
         send_email,
         post_linkedin,
-        post_twitter,
         post_facebook,
-        post_instagram,
         create_approval_request,
         check_approvals,
         update_dashboard,
         create_odoo_invoice,
         record_odoo_payment,
     )
-    
+
     tools = {
         'send_email': send_email,
         'post_linkedin': post_linkedin,
-        'post_twitter': post_twitter,
         'post_facebook': post_facebook,
-        'post_instagram': post_instagram,
         'create_approval_request': create_approval_request,
         'check_approvals': check_approvals,
         'update_dashboard': update_dashboard,
         'create_odoo_invoice': create_odoo_invoice,
         'record_odoo_payment': record_odoo_payment,
     }
-    
+
     if tool_name not in tools:
         raise ValueError(f'Unknown tool: {tool_name}')
-    
+
     return tools[tool_name](**params)

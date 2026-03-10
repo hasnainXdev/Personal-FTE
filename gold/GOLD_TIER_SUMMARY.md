@@ -31,15 +31,6 @@
 | **Qwen Brain Integration** | `src/services/qwen_client.py` | ✓ |
 | **Qwen Orchestrator** | `src/services/qwen_orchestrator.py` | ✓ |
 
-### ✅ Skipped Features (Correctly Absent)
-| Feature | Status |
-|---------|--------|
-| WhatsApp Watcher | ✓ Removed |
-| Instagram Integration | ✓ Removed |
-| Twitter/X Integration | ✓ Removed |
-
----
-
 ## Test Results
 
 ```
@@ -148,14 +139,6 @@ cp .env.example .env
 ### 3. Required .env Configuration
 
 ```env
-# =============================================================================
-# QWEN CONFIGURATION (Primary AI Brain) - REQUIRED
-# =============================================================================
-QWEN_API_KEY=sk-your-dashscope-api-key-here
-QWEN_MODEL=qwen-max
-QWEN_BASE_URL=https://dashscope.aliyuncs.com/api/v1
-
-# Get API Key: https://dashscope.console.aliyun.com/
 
 # =============================================================================
 # ODOO CONFIGURATION (Accounting) - REQUIRED for invoicing

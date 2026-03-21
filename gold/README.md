@@ -10,15 +10,25 @@
 
 Gold Tier includes **all Silver tier features** plus:
 - ✅ **Odoo Community accounting** integration via JSON-RPC (Odoo 19+)
-- ✅ **Facebook integration** for business posts
+- ✅ **Facebook integration** for business posts via Graph API
 
 ### What's Included
 
 | Category | Features |
 |----------|----------|
 | **Silver Features** | File System Watcher, Gmail Watcher, LinkedIn posting, MCP server, Approval workflow, Scheduler |
-| **Gold Additions** | Odoo integration, Facebook integration |
+| **Gold Additions** | Odoo integration, Facebook integration (Graph API) |
 | **Skipped** | WhatsApp, Instagram, Twitter (per requirements) |
+
+### Facebook Integration Features
+
+- ✅ Post text updates to Facebook Pages
+- ✅ Share links with previews
+- ✅ Post images (via URL or file upload)
+- ✅ Schedule posts for later publishing
+- ✅ Human-in-the-loop approval workflow
+- ✅ Draft mode for review before posting
+- ✅ Automatic logging and audit trail
 
 ## Quick Start
 
@@ -29,6 +39,7 @@ Gold Tier includes **all Silver tier features** plus:
 - Claude Code subscription
 - Gmail API credentials (for Gmail watcher)
 - (Optional) Odoo Community Edition for accounting
+- (Optional) Facebook Page for social media posting
 
 ### Installation
 
@@ -183,6 +194,102 @@ invoice_id = client.create('account.move', {
 client.register_payment(invoice_id, 100)
 ```
 
+## Facebook Integration
+
+### Quick Setup
+
+**Option 1: Automated Script (Recommended)**
+
+```bash
+# Run the authentication script
+python auth_facebook.py
+```
+
+This will:
+1. Open browser to Facebook OAuth
+2. Prompt you to select your Page
+3. Save credentials automatically
+4. Update your `.env` file
+
+**Option 2: Manual Setup**
+
+1. Go to [Facebook Developers](https://developers.facebook.com)
+2. Create a new App (Business type)
+3. Add Facebook Login product
+4. Get App ID and App Secret from Settings
+5. Generate Page Access Token via Graph API Explorer
+6. Add to `.env`:
+
+```env
+FACEBOOK_APP_ID=your_app_id
+FACEBOOK_APP_SECRET=your_app_secret
+FACEBOOK_ACCESS_TOKEN=your_page_access_token
+FACEBOOK_PAGE_ID=your_page_id
+```
+
+**See `docs/FACEBOOK_SETUP.md` for detailed instructions.**
+
+### Usage
+
+```python
+from src.mcp.tools import post_facebook
+
+# Create draft (requires approval - default)
+result = post_facebook(
+    content='Exciting news about our product launch! 🚀',
+    reason='Business update',
+    auto_post=False,
+)
+
+# Post directly (no approval)
+result = post_facebook(
+    content='Flash sale today only! 50% off! 🛍️',
+    link_url='https://yourstore.com/sale',
+    auto_post=True,
+)
+
+# With image
+result = post_facebook(
+    content='Check out our new office! 🏢',
+    image_url='https://example.com/office.jpg',
+    auto_post=True,
+)
+```
+
+### Via Qwen Commands
+
+```bash
+# Create Facebook post draft
+qwen "Create a Facebook post about our Q1 achievements"
+
+# Post directly
+qwen "Post to Facebook: We just hit 1000 followers! Thank you! 🎉"
+
+# Process social media requests
+qwen "Process /Needs_Action for Facebook posts"
+```
+
+### Testing
+
+```bash
+# Test Facebook connection
+python test_facebook.py
+
+# Test with live post (optional)
+python test_facebook.py  # Select "yes" for live post test
+```
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| "Facebook not configured" | Run `python auth_facebook.py` |
+| "Invalid access token" | Re-run `python auth_facebook.py` |
+| "Missing permissions" | Ensure `pages_manage_posts` permission granted |
+| "Page not found" | Verify Page ID and admin access |
+
+---
+
 ## Human-in-the-Loop (HITL)
 
 For sensitive actions, the AI creates approval request files:
@@ -227,6 +334,12 @@ pytest tests/ -v --cov=src
 1. Verify Odoo is running: `http://localhost:8069`
 2. Check credentials in `.env`
 3. Verify database exists
+
+### Facebook posting fails
+1. Run `python auth_facebook.py` to refresh credentials
+2. Check token validity: `python test_facebook.py`
+3. Verify Page admin access
+4. See `docs/FACEBOOK_SETUP.md` for detailed setup
 
 ## License
 

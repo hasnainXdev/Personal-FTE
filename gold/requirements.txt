@@ -35,4 +35,7 @@ python-json-logger>=2.0.0
 # Security
 cryptography>=41.0.0
 
+# Social Media
+# facebook-sdk>=3.0.0  # Optional: Alternative to direct Graph API calls
+
 # Note: xmlrpc.client is part of Python standard library (no install needed)

@@ -466,39 +466,133 @@ ls -la AI_Employee_Vault/
 
 ---
 
-## Common Qwen Prompt Templates
-
-### Email Processing
+## Quick Reference Card
 
 ```bash
-qwen "Read Company_Handbook.md email rules, then process emails in /Needs_Action and draft responses"
-```
+# ===== START COMPONENTS =====
 
-### Invoice Creation
+# Start watchers (File System + Gmail)
+python -m src.main --vault ./AI_Employee_Vault --mode watchers
 
-```bash
-qwen "Read invoice requests in /Needs_Action, create Odoo invoices, create approval requests for sending"
-```
+# Start scheduler (Daily Briefing, Weekly Audit)
+python -m src.main --vault ./AI_Employee_Vault --mode scheduler
 
-### Social Media
+# Start MCP server (Tool API)
+python -m src.main --vault ./AI_Employee_Vault --mode mcp
 
-```bash
-qwen "Generate business social media posts for [TOPIC], save drafts to /Pending_Approval"
-```
+# Start Qwen orchestrator (auto-invokes every 30s)
+python -m src.services.qwen_orchestrator --vault ./AI_Employee_Vault --interval 30
 
-### Daily Operations
+# ===== QWEN COMMANDS =====
 
-```bash
-qwen "Check /Needs_Action, /Pending_Approval, update Dashboard.md with status"
-```
+# Process all pending items
+qwen "Read Company_Handbook.md, then process /Needs_Action"
 
-### Weekly Review
+# Draft email responses
+qwen "Draft responses for emails in /Needs_Action"
 
-```bash
-qwen "Generate weekly audit from /Done, /Accounting, and /Briefings folders"
+# Create Facebook post
+qwen "Create Facebook post draft for [TOPIC]"
+
+# Create LinkedIn post
+qwen "Create LinkedIn post about [TOPIC]"
+
+# Create Odoo invoice
+qwen "Create Odoo invoice from /Needs_Action/INVOICE_*.md"
+
+# Record Odoo payment
+qwen "Record payment for invoice #INV-2026-001"
+
+# Generate daily briefing
+qwen "Generate daily briefing for today"
+
+# Generate weekly CEO briefing
+qwen "Generate weekly business audit and CEO briefing"
+
+# Check pending approvals
+qwen "Check /Pending_Approval and summarize what needs attention"
+
+# Update dashboard
+qwen "Update Dashboard.md with current vault status"
+
+# ===== CREATE REQUEST FILES =====
+
+# Create Facebook post request
+cat > AI_Employee_Vault/Needs_Action/SOCIAL_facebook.md << 'EOF'
+---
+type: social_media_request
+platform: facebook
+priority: normal
+---
+
+Create a post about our new product launch
+EOF
+
+# Create invoice request
+cat > AI_Employee_Vault/Needs_Action/INVOICE_client.md << 'EOF'
+---
+type: invoice_request
+client: Client Name
+amount: 1000
+description: Consulting services
+---
+
+Please create and send invoice
+EOF
+
+# ===== TEST COMMANDS =====
+
+# Run tests
+pytest tests/ -v
+
+# Validate Gold Tier
+python3 validate_gold_tier.py
+
+# Test Odoo
+uv run test_odoo.py
 ```
 
 ---
 
+## Troubleshooting
+
+### Qwen API Error
+```
+Error: QWEN_API_KEY not set
+```
+**Fix:** Add to `.env`:
+```env
+QWEN_API_KEY=sk-your-key-here
+```
+
+### Odoo Access Denied
+```
+Error: AccessDenied: Access Denied
+```
+**Fix:** Grant permissions in Odoo:
+1. Settings → Users → Your User
+2. Set Contacts: Officer
+3. Set Invoicing: Officer
+4. Save
+
+### Gmail Watcher Not Working
+```
+Warning: Gmail credentials not found
+```
+**Fix:**
+1. Get credentials from Google Cloud Console
+2. Save as `credentials/gmail_credentials.json`
+3. Run OAuth flow once
+
+### File Not Processed
+**Check:**
+- File is in `Inbox/` or `Needs_Action/`
+- File has `.md` extension for metadata files
+- Qwen orchestrator is running
+- Company_Handbook.md exists
+
+---
+
 _Quick Reference for Gold Tier - Personal AI Employee_
-_Powered by Qwen_
+_Powered by Qwen | Local-first, Agent-driven, Human-in-the-loop_
+_Gold Tier = Silver + Odoo + Facebook_

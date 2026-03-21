@@ -177,30 +177,93 @@ def post_facebook(
     image_url: Optional[str] = None,
     link_url: Optional[str] = None,
     reason: str = 'Business update',
+    auto_post: bool = False,
 ) -> Dict[str, Any]:
     """
-    Post to Facebook
-    
+    Post to Facebook via Graph API
+
     Args:
         content: Post content
         image_url: Optional image URL
         link_url: Optional link to share
         reason: Reason for post
-        
+        auto_post: If True, post directly; if False, create draft for approval
+
     Returns:
         Result dictionary
     """
     logger.info('Posting to Facebook')
-    
+
     try:
-        # Create draft for approval (Gold tier feature)
-        draft_path = Path('./AI_Employee_Vault/Pending_Approval')
-        draft_path.mkdir(parents=True, exist_ok=True)
-        
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        draft_file = draft_path / f'FACEBOOK_{timestamp}.md'
-        
-        content_md = f'''---
+        # Check if auto-post is enabled
+        if auto_post:
+            # Post directly to Facebook using Graph API
+            from src.services.facebook_client import FacebookClient
+
+            client = FacebookClient()
+
+            if not client.is_configured():
+                return {
+                    'status': 'error',
+                    'error': 'Facebook not configured. Please set FACEBOOK_ACCESS_TOKEN and FACEBOOK_PAGE_ID in .env',
+                }
+
+            result = client.post(
+                message=content,
+                image_url=image_url,
+                link_url=link_url,
+            )
+
+            if result['status'] == 'success':
+                # Log the post
+                log_path = Path('./AI_Employee_Vault/Logs/Social_Media')
+                log_path.mkdir(parents=True, exist_ok=True)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                log_file = log_path / f'facebook_post_{timestamp}.md'
+
+                log_content = f'''---
+type: facebook_post_log
+platform: facebook
+created: {datetime.now().isoformat()}
+status: posted
+---
+
+# Facebook Post Log
+
+## Content
+{content}
+
+{f"**Image URL**: {image_url}" if image_url else ""}
+{f"**Link URL**: {link_url}" if link_url else ""}
+
+## Result
+- Post ID: {result.get('post_id')}
+- Post URL: {result.get('post_url')}
+- Status: Success
+
+---
+*Posted by MCP Facebook Tool (Gold Tier)*
+'''
+                log_file.write_text(log_content)
+
+                return {
+                    'status': 'posted',
+                    'post_id': result.get('post_id'),
+                    'post_url': result.get('post_url'),
+                    'message': 'Successfully posted to Facebook',
+                }
+            else:
+                return result
+
+        else:
+            # Create draft for approval (default behavior - HITL pattern)
+            draft_path = Path('./AI_Employee_Vault/Pending_Approval')
+            draft_path.mkdir(parents=True, exist_ok=True)
+
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            draft_file = draft_path / f'FACEBOOK_{timestamp}.md'
+
+            content_md = f'''---
 type: facebook_post_draft
 created: {datetime.now().isoformat()}
 status: pending_approval
@@ -218,7 +281,7 @@ status: pending_approval
 {reason}
 
 ## To Approve
-Move this file to /Approved folder
+Move this file to /Approved folder to post to Facebook
 
 ## To Reject
 Move this file to /Rejected folder with reason
@@ -226,14 +289,14 @@ Move this file to /Rejected folder with reason
 ---
 *Created by MCP Facebook Tool (Gold Tier)*
 '''
-        draft_file.write_text(content_md)
-        
-        return {
-            'status': 'draft_created',
-            'draft_path': str(draft_file),
-            'message': 'Facebook post created as draft. Move to /Approved to post.',
-        }
-        
+            draft_file.write_text(content_md)
+
+            return {
+                'status': 'draft_created',
+                'draft_path': str(draft_file),
+                'message': 'Facebook post created as draft. Move to /Approved to post.',
+            }
+
     except Exception as e:
         logger.error(f'Error creating Facebook post: {e}')
         return {

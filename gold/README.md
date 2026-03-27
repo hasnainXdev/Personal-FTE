@@ -9,16 +9,17 @@
 ## Overview
 
 Gold Tier includes **all Silver tier features** plus:
+
 - ✅ **Odoo Community accounting** integration via JSON-RPC (Odoo 19+)
 - ✅ **Facebook integration** for business posts via Graph API
 
 ### What's Included
 
-| Category | Features |
-|----------|----------|
+| Category            | Features                                                                                       |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
 | **Silver Features** | File System Watcher, Gmail Watcher, LinkedIn posting, MCP server, Approval workflow, Scheduler |
-| **Gold Additions** | Odoo integration, Facebook integration (Graph API) |
-| **Skipped** | WhatsApp, Instagram, Twitter (per requirements) |
+| **Gold Additions**  | Odoo integration, Facebook integration (Graph API)                                             |
+| **Skipped**         | WhatsApp, Instagram, Twitter (per requirements)                                                |
 
 ### Facebook Integration Features
 
@@ -129,31 +130,31 @@ gold/
 
 ### 1. Watchers (Perception)
 
-| Watcher | Description | Interval |
-|---------|-------------|----------|
+| Watcher           | Description                        | Interval  |
+| ----------------- | ---------------------------------- | --------- |
 | FileSystemWatcher | Monitors drop folder for new files | Real-time |
-| GmailWatcher | Monitors Gmail for unread emails | 2 minutes |
+| GmailWatcher      | Monitors Gmail for unread emails   | 2 minutes |
 
 ### 2. MCP Tools (Actions)
 
-| Tool | Description | Approval |
-|------|-------------|----------|
-| `send_email` | Send emails via Gmail | First time |
-| `post_linkedin` | Post to LinkedIn | Always |
-| `post_facebook` | Post to Facebook | Always |
-| `create_approval_request` | Create approval file | No |
-| `check_approvals` | Check pending approvals | No |
-| `update_dashboard` | Update Dashboard.md | No |
-| `create_odoo_invoice` | Create Odoo invoice | Yes |
-| `record_odoo_payment` | Record payment | Yes |
+| Tool                      | Description             | Approval   |
+| ------------------------- | ----------------------- | ---------- |
+| `send_email`              | Send emails via Gmail   | First time |
+| `post_linkedin`           | Post to LinkedIn        | Always     |
+| `post_facebook`           | Post to Facebook        | Always     |
+| `create_approval_request` | Create approval file    | No         |
+| `check_approvals`         | Check pending approvals | No         |
+| `update_dashboard`        | Update Dashboard.md     | No         |
+| `create_odoo_invoice`     | Create Odoo invoice     | Yes        |
+| `record_odoo_payment`     | Record payment          | Yes        |
 
 ### 3. Scheduler
 
-| Task | Cron Expression | Description |
-|------|-----------------|-------------|
-| Daily Briefing | `0 8 * * *` | 8:00 AM daily |
-| Weekly Audit | `0 18 * * 0` | Sunday 6:00 PM |
-| Dashboard Update | `0 * * * *` | Every hour |
+| Task             | Cron Expression | Description    |
+| ---------------- | --------------- | -------------- |
+| Daily Briefing   | `0 8 * * *`     | 8:00 AM daily  |
+| Weekly Audit     | `0 18 * * 0`    | Sunday 6:00 PM |
+| Dashboard Update | `0 * * * *`     | Every hour     |
 
 ## Odoo Integration
 
@@ -206,6 +207,7 @@ python auth_facebook.py
 ```
 
 This will:
+
 1. Open browser to Facebook OAuth
 2. Prompt you to select your Page
 3. Save credentials automatically
@@ -281,12 +283,12 @@ python test_facebook.py  # Select "yes" for live post test
 
 ### Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| "Facebook not configured" | Run `python auth_facebook.py` |
-| "Invalid access token" | Re-run `python auth_facebook.py` |
-| "Missing permissions" | Ensure `pages_manage_posts` permission granted |
-| "Page not found" | Verify Page ID and admin access |
+| Issue                     | Solution                                       |
+| ------------------------- | ---------------------------------------------- |
+| "Facebook not configured" | Run `python auth_facebook.py`                  |
+| "Invalid access token"    | Re-run `python auth_facebook.py`               |
+| "Missing permissions"     | Ensure `pages_manage_posts` permission granted |
+| "Page not found"          | Verify Page ID and admin access                |
 
 ---
 
@@ -305,10 +307,12 @@ status: pending
 # Approval Request: payment
 
 ## Details
+
 - Amount: $500.00
 - To: Client A
 
 ## Instructions
+
 - Move to /Approved to approve
 - Move to /Rejected to reject
 ```
@@ -326,16 +330,19 @@ pytest tests/ -v --cov=src
 ## Troubleshooting
 
 ### Gmail Watcher not working
+
 1. Ensure `credentials.json` exists in project root
 2. Run initial OAuth flow manually
 3. Check Gmail API is enabled in Google Cloud Console
 
 ### Odoo connection fails
+
 1. Verify Odoo is running: `http://localhost:8069`
 2. Check credentials in `.env`
 3. Verify database exists
 
 ### Facebook posting fails
+
 1. Run `python auth_facebook.py` to refresh credentials
 2. Check token validity: `python test_facebook.py`
 3. Verify Page admin access
@@ -353,4 +360,4 @@ MIT License
 
 ---
 
-*Built with ❤️ for the AI Employee revolution*
+_Built with ❤️ for the AI Employee revolution_

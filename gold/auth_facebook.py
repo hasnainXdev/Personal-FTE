@@ -42,10 +42,12 @@ FACEBOOK_TOKEN_URL = "https://graph.facebook.com/v18.0/oauth/access_token"
 FACEBOOK_REDIRECT_URI = "http://localhost:8080/"
 
 # Required permissions for posting to pages
+# Note: For personal use (your own pages), these don't require App Review
+# if you're an admin/developer of the app
 PERMISSIONS = [
     "pages_manage_posts",  # Create posts on pages
     "pages_read_engagement",  # Read page engagement
-    "publish_to_groups",  # Post to groups (optional)
+    # "publish_to_groups",  # Optional - only if you need group posting (requires app review)
 ]
 
 
